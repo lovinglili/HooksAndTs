@@ -1,22 +1,24 @@
-/* eslint-disable react/react-in-jsx-scope */
+import React from "react";
+import {
+  G2,
+  Chart,
+  Geom,
+  Axis,
+  Tooltip,
+  Coord,
+  Label,
+  Legend,
+  View,
+  Guide,
+  Shape,
+  Facet,
+  Util
+} from "bizcharts";
+import DataSet from "@antv/data-set";
 
-import React, { useState, useEffect } from 'react';
-// import OverviewChart from './Chart';
-const styles = require('./main.module.less');
-interface Props {
-  aa: string;
-  bb: string;
-}
-
-function Example(props: Props) {
-  const [count, setCount] = useState(1);
-  useEffect(() => {
-    fetch('/api/xiaoyi/goodsList').then(res => res.json()).then(data => {
-      console.log(data, 'data')
-    })
-  })
-  console.log(styles, 'styles')
-  const data = {
+class Stackedcolumn extends React.Component {
+  render() {
+    const data = {
     success : true,
     data : {
       totalCnt : 10,
@@ -46,7 +48,7 @@ function Example(props: Props) {
         sidecarDetails : {
           mosn : {
             'v1.0.0' : 10,
-            'v1.1.0' : 1,
+            'v1.1.1' : 1,
             none : 5
           },
           odp : {
@@ -54,7 +56,7 @@ function Example(props: Props) {
             none : 10
           },
           mist : {
-            'v1.0.0' : 1,
+            'v1.0.1' : 1,
             none : 9
           }
         }
@@ -74,7 +76,7 @@ function Example(props: Props) {
     currentValue={};
   });
   console.log(leftValue,'left')
-
+const color=['#E6F6C8-#3376CB']
 const rightValue:any = [];
 let versionList:string[]=[];
   // right 的表格数据。currentType 改变的时候，用useMemo函数。
@@ -89,61 +91,42 @@ let versionList:string[]=[];
       currentValue={};
     };
     // versionLList 单独穿给图标，根据currentType传递颜色
-    versionList =  versionList.filter((item,index,arr)=>arr.indexOf(item)===index);
+    versionList =  versionList.filter((item,index,arr)=>arr.indexOf(item)===index).sort();
    console.log(rightValue,versionList,'rightValue')
+    versionList.shift();
+    versionList.push('none')
   });
-
-
-  return (
-    <>
-      <div className={styles.container}>you clicked {count} times</div>
-      <button onClick={() => setCount(count + 1)}>add</button>
-      <button onClick={() => setCount(count - 1)}>reduce</button>
-      <div style={{ marginTop: 20 }}>
-        {/* <OverviewChart /> */}
+    const ds = new DataSet();
+    const dv = ds.createView().source(rightValue);
+    dv.transform({
+      type: "fold",
+      fields: versionList,
+      // 展开字段集
+      key: "是否开启名称",
+      // key字段
+      value: "数量",
+      // value字段
+      retains: ["name"] // 保留字段集，默认为除fields以外的所有字段
+    });
+    return (
+      <div>
+        <Chart height={400} data={dv} forceFit>
+          <Legend />
+         
+          <Axis
+            name="name"
+          />
+          <Axis name="数量" />
+          <Tooltip inPlot={false} crosshairs={false} />
+          <Geom
+            type="intervalStack"
+            position="name*数量"
+            color={['是否开启名称', '#0000ff-#bbbbbb']}
+          />
+        </Chart>
       </div>
-    </>
-  );
+    );
+  }
 }
 
-function A() {
-  let aa = "ads"
-  return <Example aa={aa} bb='ss' />
-}
-
-export default A;
-
-// class Example extends React.Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       count: 0
-//     };
-//   }
-
-//   componentDidMount(){
-//     fetch('/api/xiaoyi/goodsList').then(res=>res.json()).then(data=>{
-//       console.log(data,'data')
-//     })
-//   }
-//   getstatus(){
-
-//   }
-
-//   getStatus(){
-
-//   }
-
-// // TODO:
-// // FIXME:
-//   render() {
-//     return (
-//       <>
-//         <div>You clicked {this.state.count} times</div>
-//         <button onClick={() => this.setState({ count: this.state.count + 1 })}>add</button>
-//         <button onClick={() => this.setState({ count: this.state.count - 1 })}>reduce</button>
-//       </>
-//     );
-//   }
-// }
-// export default Example
+ReactDOM.render(<Stackedcolumn />, mountNode)
